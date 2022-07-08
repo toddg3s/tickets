@@ -1,0 +1,14 @@
+{% extends "web/layout.html" %}
+{% block title %}
+    List of Events
+{% endblock %}
+{% block nav %}
+{% endblock %}
+{% block content %}
+<div>
+    <img src="{% static 'web/listx.jpg' %}"/>
+    <a href="{% url 'eventsmonth' %}"><img src="{% static 'web/month.jpg' %}" /></a>
+    <a href="{% url 'eventsweek' %}"><img src="{% static 'web/week.jpg' %}" /></a>
+</div>
+<hr />
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "web/layout.html" %}
+{% block title %}
+    Home
+{% endblock %}
+{% block nav %}
+nothing here, yet
+{% endblock %}
+{% block content %}
+{% load socialaccount %}
+<a href="{% provider_login_url 'google' %}?next=/">Login with Google</a><br/>
+{% for o in output %}
+{{ o }}<br/>
+{% endfor %}
+{% endblock %}

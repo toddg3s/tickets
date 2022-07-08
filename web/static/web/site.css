@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+.titlebar {
+    background-color: deepskyblue;
+    width: 100%;
+    display: block;
+    height: 50px;
+}
+.logoblock {
+    display:block;
+    width: 50px;
+    height: 50px;
+    float: left;
+}
+.titleblock {
+    color: black;
+    font-size: x-large;
+    font-weight: bold;
+    height: 50px;
+    padding-left: 10px;
+}
+.body-content {
+    padding: 5px;
+    clear: both;
+}
+.navblock {
+    background-color:darkslategray;
+    width: 250px;
+    height: 500px;
+    display: block;
+    float: left;
+    color: white;
+    padding: 5px;
+}
+.navblock a:link {
+    color: white;
+}
+.navblock a:visited {
+    color: white;
+}
+
+.contentblock {
+    padding-left: 10px;
+}
