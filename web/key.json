@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "tickets-g3s",
+  "private_key_id": "976ae0ce30eac9f6e07d96b40a8d6a3a7d7728eb",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDlGXYMuzq7bu4m\ngtIfhwIpW1N2h1JrfDP1Flpho8PcyLUJdiR0u78PV97cMwsJqx6f/gqVP6y18dGK\nKcd42ThB0nAOysx+RwJtiA3iCQOki/aeGwZzqvYCgmgmM0AKPzX7nOYx+hUOXNMm\nKE9hFlFQCmEDcAaEdmB9N/vSw+X/Iy6Qt7YyCM/f/kmveBLKUW/baEe675eWTu6n\nzTlZ1/TlCTrXvJw5g1oLjOpxo/7wyFQ6qZXbiu7WtbCVrQb/fy8dU305Flq71VFl\nOTYM/4408JTO5H4/bR9aLIoh5NuRhHYjw3d7uPUOlxxYispx3rCcKM0B/e5/Z8nI\n/Zcdt1z1AgMBAAECggEAAexLUzL2IUf+jmZFEpyaiaX5j/t1u9O8iA4pXvvMvtSU\nmnEe9wDg3W6R2oDSwKUzvqRpuGZZ0hndyDnKDT2G9lNWRIfN5dYrHBWdYje58DVm\nH7mxj+uiV8qMpgm5TjXbQ3dhb/10ppOa9kQ2I8qqRdmLT2x4MhtgIAmF8TdIhvtj\nlmM/hU2iLDjUiPKHQi+ritpVMY6Cyl3GXmk4gXfactDtwhMHg7WJl6hkPCCL8fCa\nsB2qM3VoN349aX0IQMGBDy1cDxBEf9DqqylCtYzj5atYppImW2YVLShC47FteBdR\nJaT34bnmCjKgyzio2JRGe3iWlLsJ8jLeTT5+1zo+4QKBgQD4wD8+D/6SIPqRqfNo\nboQM15k+H1vnq12bj6gNYxweuR4zQkrclZV+184dLoYdjVZaUETzDG1D3JSAJc8r\nJyOwDCUO+r6JruEUcOZ3z+pZxDt4/ry2ADU+PgOAqjKYWFZA/NOyJj22kraJztji\nczdR7hqWeoZ01K9eouGt/84ylQKBgQDrxpu2ng3gJG3ikqkEgZAvTIey6yzhL+cG\n67pPSx0A47o7SZ9YnhI/OyHTHtH+FMJXc3YfWk8hgitFmsGCQvBmKzrJMQLoh3eL\nWT2L2eoAE2NwHaGw9MV/cCd8d4g85iVni7NgsQtVTvD6+3+EECXv00S4Lx/wF1YT\ntTP8qHdI4QKBgQCXk5Y1/EsUwnHNVzFSfp2KscnYeAVpyxuUUlqGJdGZyxXjCE9T\n0Payv1ACqjnhQiHPkMAjFnxycLQwzllKI2R0v0HJufNnNKBE83MMqS5VmuTemuNl\nSAUps2IxAgUonhOZMDbThMfwO8BtgxTYEHsyOpQLBAhworVmRnycqZb9bQKBgFnZ\nmxeRzfngCBwzBcQY1+iegowVgUnjpmgFxz9WgZwILL1RRi9QNeXw0+gPs7jfElyf\nPKGgGc3MPE9PNXU9qz1UNhfb3J7emRj6jjDQf5M90EQ2lprH/Mee5v1Q1BNZJWH7\nZAVyEr6U0dLjqumZ+csWOPbzxnkJe50RDdm4HZUhAoGAWk/8pXN/ixvt+Vff4SNM\nC3h53GDp7YbbiSTqD0UqMm5OiwrX6Z63J7tqPhukt/m2KUJtosdjIgOPIFIm8nKC\nDQy9svizIVAXbvfg1TpNtGVdmY3TJFGrEi9kv9fBzBtfjdFBsk+Zs4BgQxdpPkml\n6OdZCv0/3jC3OjzrrKieego=\n-----END PRIVATE KEY-----\n",
+  "client_email": "tickets-service-account@tickets-g3s.iam.gserviceaccount.com",
+  "client_id": "106739660458385557316",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/tickets-service-account%40tickets-g3s.iam.gserviceaccount.com"
+}
