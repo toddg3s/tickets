@@ -4,12 +4,13 @@ from dateutil import parser
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from typing import Any, Dict, List
+import os
 
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 service_account_email = "tickets-service-account@tickets-g3s.iam.gserviceaccount.com"
-credentials = service_account.Credentials.from_service_account_file('key.json')
+credentials = service_account.Credentials.from_service_account_file("web/key.json")
 scoped_credentials = credentials.with_scopes(SCOPES)
 
 service = build("calendar", "v3", credentials=scoped_credentials)
@@ -56,11 +57,11 @@ class Event:
 class Calendar:
 
     def ListEvents(calendarid: str, datefrom: date, dateto: date) -> List['Event']:
-        calevents = service.event().list(calendarId=calendarid).execute()
+        calevents = service.events().list(calendarId=calendarid).execute()
         datetimeto = datetime(dateto.year, dateto.month, dateto.day, 23, 59, 59)
 
         events = [Event.fromCalEvent(e, calendarid, calevents['summary']) for e in calevents['items'] if e['start']['dateTime'] >= datefrom and e['start']['dateTime'] <= datetimeto]
-        events.sort(lambda e: e.start, reverse=False)
+        events.sort(key=lambda e: e.start, reverse=False)
         return events
     
     def GetEvent(eventid: str) -> 'Event':

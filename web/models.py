@@ -18,29 +18,20 @@ class Ticket(models.Model):
     def __str__(self):
         return f"sec {self.section} row {self.row} seat {self.seat} - {self.name}"
 
-    def loadEvents(self, range: 'DateRange'):
-        pass
-
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
 
 class TicketSet(models.Model):
     name = models.CharField(max_length=300)
     tickets = models.ManyToManyField(Ticket)
 
-
-class TicketsBase(models.Model):
-    navsets = []
-    navlink = "eventslist"
-
-
-class Home(TicketsBase):
-    pass
-
-
-class MultiView(TicketsBase):
-    tickets = []
-    daterange = None
-
-
-class SingleView(TicketsBase):
-    tickets = []
-    eventdate = date.today()
+    def as_dict(self):
+        tix = [t.as_dict() for t in self.tickets.all()]
+        tix.sort(key = lambda t: t["name"], reverse=False)
+        return {
+            "name": self.name,
+            "tickets": tix
+        }

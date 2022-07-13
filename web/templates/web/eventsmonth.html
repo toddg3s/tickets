@@ -1,9 +1,34 @@
 {% extends "web/layout.html" %}
 {% block title %}
-    Events for month
+    Events for {{set.name}} during {{rangestr}}
 {% endblock %}
 {% block nav %}
 {% endblock %}
 {% block content %}
+<h1>{{rangestr}}</h1>
+<div class="monthtable">
+    <div class="weekrow">
+        <div class="dayhead">Monday</div>
+        <div class="dayhead">Tuesday</div>
+        <div class="dayhead">Wednesday</div>
+        <div class="dayhead">Thursday</div>
+        <div class="dayhead">Friday</div>
+        <div class="dayhead">Saturday</div>
+        <div class="dayhead">Sunday</div>
+    </div>
+{% for week in days %}
+    <div class="weekrow">
+    {% for dayofweek in week %}
+        <div class="daycell">
+            <div class="daynum">{{dayofweek.number}}</div><br/>
+            <div class="daysum">{{dayofweek.summary}}</div><br/>
+        {% for e in dayofweek.events %}
+            <div class="event, {{e.status}}"><a href="{% url "eventedit" e.calendarid e.id %}">e.name</a></div>
+        {% endfor %}
+        </div>
+    {% endfor %}
+    </div>
+{% endfor %}
+</div>
 {% load socialaccount %}
 {% endblock %}

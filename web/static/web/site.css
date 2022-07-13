@@ -26,6 +26,8 @@ body {
 }
 .navblock {
     background-color:darkslategray;
+    font-size: large;
+    font-weight: bold;
     width: 250px;
     height: 500px;
     display: block;
@@ -43,3 +45,8 @@ body {
 .contentblock {
     padding-left: 10px;
 }
+
+.monthtable { display: table;}
+.weekrow {display: table-row;}
+.dayhead {display: table-header-group;}
+.daycell {display: table-cell;}

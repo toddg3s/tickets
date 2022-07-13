@@ -89,19 +89,29 @@ class DateRange:
         range.dateto = self.dateto
 
 
-class Base:
-    set: TicketSet = None
-    eventdata: List[List[Event]]
-    eventindex: List[int]
-    def __init__(self, set: TicketSet):
+class Page:
+    navset: List[TicketSet] = []
+    navlink: str = ""
+    setname: str = ""
+    def __init__(self, navset, navlink, setname):
+        self.navset = navset
+        self.navlink = navlink
+        self.setname = setname
+
+class ListBase(Page):
+    set = None
+    eventdata = []
+    eventindex = []
+    def __init__(self, navset, navlink, set):
+        super().__init__(navset, navlink, set["name"])
         self.set = set
 
     def FillEventData(self, datefrom: date, dateto: date):
-        numtix = len(self.set.tickets)
+        numtix = len(self.set["tickets"])
         eventdata = [numtix]
         eventindex = [numtix]
         for i in range(numtix):
-            events = Calendar.ListEvents(self.set.tickets[i].id, self.range.datefrom, self.range.dateto)
+            events = Calendar.ListEvents(self.set["tickets"][i]["id"], datefrom, dateto)
             eventdata[i] = events
             eventindex[i] = 0
 
@@ -112,12 +122,12 @@ class Row:
     events: List[Event]
 
 
-class List(Base):
+class List(ListBase):
     range = DateRange(date.today(), "list")
     rows: List[Row] = []
 
-    def __init__(self, id=None, name=None, datefrom=None, dateto=None):
-        super().__init__(id=id, name=name)
+    def __init__(self, navset, navlink, set, datefrom=None, dateto=None):
+        super().__init__(navset, navlink, set.name)
         range = DateRange(datefrom=datefrom, type="list")
         range.dateto = dateto if dateto is not None else date.max
 
@@ -144,18 +154,27 @@ class List(Base):
 class Day:
     number: str = ""
     summary: str = ""
-    events: List[Event] = []
+    events = [] # : List[Event] = []
 
 
-class Month(Base):
+class Month(ListBase):
     range = DateRange(date.today(), "month")
-    days: List[List[Day]]= [5][7]
-    def __init__(self, set: TicketSet, month: int, year: int):
-        super().__init__(set)
+    rangestr = ""
+    days = None
+    def __init__(self, navset, navlink, set, month: int, year: int):
+        super().__init__(navset, navlink, set)
         self.range = DateRange(date(year, month, 1), "month")
+        self.rangestr = str(self.range)
 
     def FillDays(self):
-        numtix = len(self.set.tickets)
+        numtix = len(self.set["tickets"])
+        self.days = [
+            [Day(), Day(), Day(), Day(), Day(), Day(), Day()],
+            [Day(), Day(), Day(), Day(), Day(), Day(), Day()],
+            [Day(), Day(), Day(), Day(), Day(), Day(), Day()],
+            [Day(), Day(), Day(), Day(), Day(), Day(), Day()],
+            [Day(), Day(), Day(), Day(), Day(), Day(), Day()],
+        ]
         super().FillEventData(self.range.datefrom, self.range.dateto)
         monthdone = False
         for weeknum in range(5):
@@ -182,13 +201,15 @@ class Month(Base):
                 self.days[weeknum][daynum] = day
 
 
-class Week(Base):
+class Week(ListBase):
     range = DateRange(date.today(), "week")
-    days: List[Day] = [7]
+    days = None
 
     def __init__(self, set: TicketSet, datefrom: date):
         super().__init__(set)
         self.range = DateRange(datefrom, "week")
+        self.days = [Day(), Day(), Day(), Day(), Day(), Day(), Day()]
+
 
     def FillDays(self):
         super().FillEventData(self.range.datefrom, self.range.dateto)
@@ -209,3 +230,10 @@ class Week(Base):
                         day.events[i] = event
                         self.eventindex[i] = self.eventindex[i] + 1
             self.days[weekday] = day
+
+
+class SetEdit(Page):
+    set = None
+    def __init__(self, navset, navlink, set):
+        super().__init__(navset, navlink, set["name"])
+        self.set = set

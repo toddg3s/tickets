@@ -5,10 +5,13 @@ def getNavSets(request):
         return request.session["navsets"]
     else:
         result = TicketSet.objects.all()
-        for s in result:
-            print(s.name)
-            for t in s.tickets:
-                print(t.name)
-        navsets = [s for s in result]
+        navsets = [s.as_dict() for s in result]
         request.session["navsets"] = navsets
         return navsets
+
+def getNavLink(request):
+    if "navlink" in request.session and request.session["navlink"]:
+        return request.session["navlink"]
+    else:
+        request.session["navlink"] = "eventsmonth"
+        return request.session["navlink"]
