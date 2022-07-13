@@ -6,7 +6,7 @@ import re
 from django.db import models
 from web.models import Ticket, TicketSet
 from web.cal import Event, Calendar
-
+import json
 class DateRange:
     datefrom = date.min
     dateto = date.max
@@ -107,13 +107,13 @@ class ListBase(Page):
         self.set = set
 
     def FillEventData(self, datefrom: date, dateto: date):
+        self.eventdata = []
+        self.eventindex = []
         numtix = len(self.set["tickets"])
-        eventdata = [numtix]
-        eventindex = [numtix]
         for i in range(numtix):
-            events = Calendar.ListEvents(self.set["tickets"][i]["id"], datefrom, dateto)
-            eventdata[i] = events
-            eventindex[i] = 0
+            events = Calendar.ListEvents(self.set["tickets"][i]["id"], self.set["tickets"][i]["name"], datefrom, dateto)
+            self.eventdata.append(events)
+            self.eventindex.append(0)
 
 
 class Row:
@@ -169,35 +169,47 @@ class Month(ListBase):
     def FillDays(self):
         numtix = len(self.set["tickets"])
         self.days = [
-            [Day(), Day(), Day(), Day(), Day(), Day(), Day()],
-            [Day(), Day(), Day(), Day(), Day(), Day(), Day()],
-            [Day(), Day(), Day(), Day(), Day(), Day(), Day()],
-            [Day(), Day(), Day(), Day(), Day(), Day(), Day()],
-            [Day(), Day(), Day(), Day(), Day(), Day(), Day()],
+            [{}, {}, {}, {}, {}, {}, {}],
+            [{}, {}, {}, {}, {}, {}, {}],
+            [{}, {}, {}, {}, {}, {}, {}],
+            [{}, {}, {}, {}, {}, {}, {}],
+            [{}, {}, {}, {}, {}, {}, {}],
+            [{}, {}, {}, {}, {}, {}, {}],
         ]
         super().FillEventData(self.range.datefrom, self.range.dateto)
+        print("in fill days")
+        print("# event data: " + str(len(self.eventdata)))
+        print("# events: " + str(len(self.eventdata[0])))
         monthdone = False
-        for weeknum in range(5):
+        for weeknum in range(6):
             for daynum in range(7):
                 dayofmonth = (weeknum * 7) + daynum - self.range.datefrom.weekday() + 1
                 if dayofmonth < 1 or dayofmonth > self.range.dateto.day:
-                    self.days[weeknum][daynum] = Day()
+                    self.days[weeknum][daynum] = {}
                     continue
-                day = Day()
-                day.number = str(dayofmonth)
-                day.summary = ""
-                day.events = [numtix]
+                day = {
+                    "number": str(dayofmonth),
+                    "summary": "",
+                    "events": [],
+                }
 
                 currdate = date(self.range.datefrom.year, self.range.datefrom.month, dayofmonth)
                 for i in range(numtix):
                     if self.eventindex[i] > len(self.eventdata[i]) - 1:
-                        day.events[i] = Event()
+                        day["events"].append({})
                     else:
                         event = self.eventdata[i][self.eventindex[i]]
-                        if event.start.date() == currdate:
-                            day.summary = event.summary
-                            day.events[i] = event
+                        print(f"{i} {weeknum} {daynum} {currdate} {event['id']} {event['name']}")
+                        if event["start"].date() == currdate:
+                            day["summary"] = event["summary"]
+                            day["events"].append({
+                                "calendarid": event["calendarid"],
+                                "id": event["id"],
+                                "name": event["name"],
+                                "status": event["status"],
+                            })
                             self.eventindex[i] = self.eventindex[i] + 1
+                print("day = " + json.dumps(day))
                 self.days[weeknum][daynum] = day
 
 

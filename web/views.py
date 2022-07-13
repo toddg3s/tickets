@@ -6,6 +6,7 @@ from django.views.generic import FormView
 from web.models import *
 from web.types import *
 from web.utils import getNavSets, getNavLink
+import json
 
 def index(request):
     navsets = getNavSets(request)
@@ -27,7 +28,7 @@ def eventsmonth(request, setname = "", datefrom=""): # Display events for ticket
     set = [set for set in navsets if set['name'] == setname][0]
     page = Month(navsets, "eventsmonth", set, month, year)
     page.FillDays()
-    print(page.__dict__)
+    # print(page.__dict__)
     return render(request, "web/eventsmonth.html", page.__dict__)
 
 def eventsweek(request, setname = "", datefrom = ""): # Display events for ticket(s) in week form

@@ -23,7 +23,7 @@
             <div class="daynum">{{dayofweek.number}}</div><br/>
             <div class="daysum">{{dayofweek.summary}}</div><br/>
         {% for e in dayofweek.events %}
-            <div class="event, {{e.status}}"><a href="{% url "eventedit" e.calendarid e.id %}">e.name</a></div>
+            <div class="event {{e.status}}"><a href="#">{{e.name}}</a></div>
         {% endfor %}
         </div>
     {% endfor %}

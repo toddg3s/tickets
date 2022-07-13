@@ -46,7 +46,16 @@ body {
     padding-left: 10px;
 }
 
-.monthtable { display: table;}
+.monthtable { display: table; width: 100%;}
 .weekrow {display: table-row;}
-.dayhead {display: table-header-group;}
-.daycell {display: table-cell;}
+.dayhead {display: table-cell; font-weight: bold; height: 30px;}
+.daycell {display: table-cell; height: 100px;}
+
+.event { display: inline-block;}
+.event a:link { color: white;}
+.event a:visited {color: white;}
+.event.available { background-color: darkgreen;}
+.event.interest { background-color: darkgoldenrod;}
+.event.pending { background-color: darkblue;}
+.event.reserved { background-color: darkred;}
+.event.unknown { background-color: black;}

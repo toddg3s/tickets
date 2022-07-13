@@ -4,7 +4,9 @@ from dateutil import parser
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from typing import Any, Dict, List
-import os
+
+import pytz
+import json
 
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
@@ -24,11 +26,11 @@ class Event:
     start: datetime = datetime.min
     end: datetime = datetime.max
     status:str = ""
-    interest: List[Dict[str, Any]] = []
+    interest = []
     paid: bool = False
     transferred: bool = False
 
-    def fromCalEvent(calevent, calendarid, calendarname) -> 'Event':
+    def fromCalEventOld(calevent, calendarid, calendarname) -> 'Event':
         event = Event()
         event.id = calevent['id']
         event.calendarid = calendarid
@@ -41,27 +43,58 @@ class Event:
         if 'colorId' in calevent:
             if calevent['colorId'] == '0':
                 event.status = 'available'
-            elif calevent['colorid'] == '1':
+            elif calevent['colorId'] == '1':
                 event.status = 'interest'
-            elif calevent['colorid'] == '2':
+            elif calevent['colorId'] == '2':
                 event.status = 'pending'
-            elif calevent['colorid'] == '3':
+            elif calevent['colorId'] == '3':
                 event.status = 'reserved'
 
         if 'extendedProperties' in calevent and 'private' in calevent['extendedProperties']:
             event.interest = calevent['extendedProperties']['private']['interest']
             event.paid = calevent['extendedProperties']['private']['paid']
             event.transferred = calevent['extendedProperties']['private']['transferred']
-    
+
+        return event
+
+    def fromCalEvent(calevent, calendarid, calendarname):
+        event = {
+            "id": calevent["id"],
+            "calendarid": calendarid,
+            "summary": calevent["summary"],
+            "name": calendarname,
+            "location": calevent["location"],
+            "start": parser.parse(calevent["start"]["dateTime"]),
+            "end": parser.parse(calevent["end"]["dateTime"]),
+            "status": "unknown",
+        }
+        if 'colorId' in calevent:
+            if calevent['colorId'] == '2': # green
+                event["status"] = 'available'
+            elif calevent['colorId'] == '5': # yellow
+                event["status"] = 'interest'
+            elif calevent['colorId'] == '7': # blue
+                event["status"] = 'pending'
+            elif calevent['colorId'] == '11': # red
+                event["status"] = 'reserved'
+
+        if 'extendedProperties' in calevent and 'private' in calevent['extendedProperties']:
+            event["interest"] = calevent['extendedProperties']['private']['interest']
+            event["paid"] = calevent['extendedProperties']['private']['paid']
+            event["transferred"] = calevent['extendedProperties']['private']['transferred']
+
+        return event
+
 
 class Calendar:
 
-    def ListEvents(calendarid: str, datefrom: date, dateto: date) -> List['Event']:
+    def ListEvents(calendarid: str, calendarname: str, datefrom: date, dateto: date) -> List['Event']:
         calevents = service.events().list(calendarId=calendarid).execute()
+        datetimefrom = datetime(datefrom.year, datefrom.month, datefrom.day, 0, 0, 0)
         datetimeto = datetime(dateto.year, dateto.month, dateto.day, 23, 59, 59)
-
-        events = [Event.fromCalEvent(e, calendarid, calevents['summary']) for e in calevents['items'] if e['start']['dateTime'] >= datefrom and e['start']['dateTime'] <= datetimeto]
-        events.sort(key=lambda e: e.start, reverse=False)
+        leftcoast = pytz.timezone('US/Pacific')
+        events = [Event.fromCalEvent(e, calendarid, calendarname) for e in calevents['items'] if parser.parse(e['start']['dateTime']) >= leftcoast.localize(datetimefrom) and parser.parse(e['start']['dateTime']) <= leftcoast.localize(datetimeto)]
+        events.sort(key=lambda e: e["start"], reverse=False)
         return events
     
     def GetEvent(eventid: str) -> 'Event':
