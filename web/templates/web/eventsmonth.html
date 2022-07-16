@@ -4,8 +4,9 @@
 {% endblock %}
 {% block nav %}
 {% endblock %}
+{% load static %}
 {% block content %}
-<h1>{{rangestr}}</h1>
+<h1><a href="{% url "eventsmonthvalue" setname prevmonth %}"><img src="{% static 'web/left.jpg' %}"/></a>&nbsp;{{rangestr}}&nbsp;<a href="{% url "eventsmonthvalue" setname nextmonth %}"><img src="{% static 'web/right.jpg' %}"/></a></h1>
 <div class="monthtable">
     <div class="weekrow">
         <div class="dayhead">Monday</div>
@@ -21,10 +22,12 @@
     {% for dayofweek in week %}
         <div class="daycell">
             <div class="daynum">{{dayofweek.number}}</div><br/>
+        {% if dayofweek.summary != "" %}
             <div class="daysum">{{dayofweek.summary}}</div><br/>
-        {% for e in dayofweek.events %}
-            <div class="event {{e.status}}"><a href="#">{{e.name}}</a></div>
-        {% endfor %}
+            {% for e in dayofweek.events %}
+            <div class="event {{e.status}}"><a href="{% url "eventedit" e.calendarid e.id %}">{{e.name}}</a> {{e.attendee}}</div>
+            {% endfor %}
+        {% endif %}
         </div>
     {% endfor %}
     </div>

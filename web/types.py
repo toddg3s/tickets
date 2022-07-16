@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 from typing import List
 import re
 from django.db import models
-from web.models import Ticket, TicketSet
+from web.models import NHLStats, Ticket, TicketSet
 from web.cal import Event, Calendar
 import json
 class DateRange:
@@ -30,6 +30,30 @@ class DateRange:
             self.datefrom = datefrom
             self.dateto = datefrom
         
+    def previous(self):
+        if self.type == "year":
+            return str(self.datefrom.year - 1)
+        elif self.type == "month":
+            prev = self.datefrom - relativedelta(months = 1)
+            return prev.strftime("%m-%Y")
+        elif self.type == "week":
+            prev = self.datefrom - relativedelta(days = 7)
+            return prev.strftime("%Y-%m-%d")
+        else:
+            return ""
+
+    def next(self):
+        if self.type == "year":
+            return str(self.datefrom.year + 1)
+        elif self.type == "month":
+            next = self.datefrom + relativedelta(months = 1)
+            return next.strftime("%m-%Y")
+        elif self.type == "week":
+            next = self.datefrom + relativedelta(days = 7)
+            return next.strftime("%Y-%m-%d")
+        else:
+            return ""
+
 
     def __str__(self):
         if self.type is None:
@@ -124,32 +148,41 @@ class Row:
 
 class List(ListBase):
     range = DateRange(date.today(), "list")
-    rows: List[Row] = []
+    rows = []
 
     def __init__(self, navset, navlink, set, datefrom=None, dateto=None):
-        super().__init__(navset, navlink, set.name)
-        range = DateRange(datefrom=datefrom, type="list")
-        range.dateto = dateto if dateto is not None else date.max
+        super().__init__(navset, navlink, set)
+        if datefrom == "":
+            datefrom = date.today()
+        else:
+            datefrom = parser.parse(datefrom).date()
+        if dateto == "":
+            dateto = date(2050,12,31)
+        else:
+            dateto = parser.parse(dateto).date()
+        self.range = DateRange(datefrom=datefrom, type="list")
+        self.range.dateto = dateto
 
     def FillRows(self):
         super().FillEventData(self.range.datefrom, self.range.dateto)
-        numtix = len(self.set.tickets)
-        currdate = self.range.datefrom
-        while currdate <= self.range.dateto:
-            row = Row()
-            row.date = currdate
-            row.summary = ""
-            row.events = [numtix]
-            for i in range(numtix):
-                event = self.eventdata[i][self.eventindex[i]]
-                if event.start.date() == currdate:
-                    row.summary = event.Get('summary', "")
-                    row.events[i] = event
-                    self.eventindex[i] = self.eventindex[i] + 1
-                else:
-                    row.events[i] = Event()
-            currdate = currdate + relativedelta(days = 1)
-
+        numtix = len(self.set["tickets"])
+        self.rows = []
+        for index in range(len(self.eventdata[0])):
+            row = {
+                "start": self.eventdata[0][index]["start"].strftime("%a, %b %-d, %Y %-I %p"),
+                "summary": self.eventdata[0][index]["summary"],
+                "events": []
+            }
+            for tixindex in range(numtix):
+                event = self.eventdata[tixindex][index]
+                row["events"].append({
+                    "calendarid": event["calendarid"],
+                    "id": event["id"],
+                    "name": event["name"],
+                    "status": event["status"],
+                    "attendee": event["attendee"]
+                })
+            self.rows.append(row)
 
 class Day:
     number: str = ""
@@ -160,10 +193,14 @@ class Day:
 class Month(ListBase):
     range = DateRange(date.today(), "month")
     rangestr = ""
+    prevmonth = ""
+    nextmonth = ""
     days = None
     def __init__(self, navset, navlink, set, month: int, year: int):
         super().__init__(navset, navlink, set)
         self.range = DateRange(date(year, month, 1), "month")
+        self.prevmonth = self.range.previous()
+        self.nextmonth = self.range.next()
         self.rangestr = str(self.range)
 
     def FillDays(self):
@@ -177,10 +214,6 @@ class Month(ListBase):
             [{}, {}, {}, {}, {}, {}, {}],
         ]
         super().FillEventData(self.range.datefrom, self.range.dateto)
-        print("in fill days")
-        print("# event data: " + str(len(self.eventdata)))
-        print("# events: " + str(len(self.eventdata[0])))
-        monthdone = False
         for weeknum in range(6):
             for daynum in range(7):
                 dayofmonth = (weeknum * 7) + daynum - self.range.datefrom.weekday() + 1
@@ -199,7 +232,6 @@ class Month(ListBase):
                         day["events"].append({})
                     else:
                         event = self.eventdata[i][self.eventindex[i]]
-                        print(f"{i} {weeknum} {daynum} {currdate} {event['id']} {event['name']}")
                         if event["start"].date() == currdate:
                             day["summary"] = event["summary"]
                             day["events"].append({
@@ -207,9 +239,9 @@ class Month(ListBase):
                                 "id": event["id"],
                                 "name": event["name"],
                                 "status": event["status"],
+                                "attendee": event["attendee"]
                             })
                             self.eventindex[i] = self.eventindex[i] + 1
-                print("day = " + json.dumps(day))
                 self.days[weeknum][daynum] = day
 
 
@@ -249,3 +281,141 @@ class SetEdit(Page):
     def __init__(self, navset, navlink, set):
         super().__init__(navset, navlink, set["name"])
         self.set = set
+
+
+class EventEdit(Page):
+    event = None
+
+    def __init__(self, navset, navlink, event):
+        setname = ""
+        for set in navset:
+            for ticket in set["tickets"]:
+                if ticket["id"] == event["calendarid"]:
+                    setname = set["name"]
+                    break
+        super().__init__(navset, navlink, setname)
+        event["date"] = event["start"].strftime("%A %B %-d, %Y %-I:%M %p")
+        self.event = event
+
+class ReportAvailable(Page):
+    teamlookup = {
+        "ANA":"Anaheim Ducks",
+        "ARI":"Arizona Coyotes",
+        "BOS":"Boston Bruins",
+        "BUF":"Buffalo Sabres",
+        "CAR":"Carolina Hurricanes",
+        "CBJ":"Colorado Blue Jackets",
+        "CGY":"Calgary Flames",
+        "CHI":"Chicago Blackhawks",
+        "COL":"Colorado Avalanche",
+        "DAL":"Dallas Stars",
+        "DET":"Detroit Red Wings",
+        "EDM":"Edmonton Oilers",
+        "FLA":"Florida Panthers",
+        "LAK":"Los Angeles Kings",
+        "MIN":"Minnesota Wild",
+        "MTL":"Montreal Canadiens",
+        "NJD":"New Jersey Devils",
+        "NSH":"Nashville Predators",
+        "NYI":"New York Islanders",
+        "NYR":"New York Rangers",
+        "OTT":"Ottawa Senators",
+        "PHI":"Philadelphia Flyers",
+        "PIT":"Pitsburgh Penguins",
+        "SJS":"San Jose Sharks",
+        "STL":"St. Louis Blues",
+        "TBL":"Tampa Bay Lightning",
+        "TOR":"Toronto Maple Leafs",
+        "VAN":"Vancouver Canucks",
+        "VGK":"Vegas Golden Knights",
+        "WPG":"Winnipeg Jets",
+        "WSH":"Washington Capitals",
+    }
+
+    set = None
+    numtix = 0
+    range = DateRange(date.today(), "list")
+    messages = []
+    rows = []
+
+    def __init__(self, navset, navlink, setname, datefrom, dateto):
+        super().__init__(navset, navlink, setname)
+        self.set = [set for set in navset if set["name"] == setname][0]
+        self.numtix = len(self.set["tickets"])
+        self.range = DateRange(datefrom, "list")
+        self.range.dateto = dateto
+
+    def RunReport(self):
+        tickets = []
+        numevents = 0
+        self.messages = []
+        self.rows = []
+        nhlstats = NHLStats.objects.all()
+        for ticket in self.set["tickets"]:
+            events = Calendar.ListEvents(ticket["id"], ticket["name"], self.range.datefrom, self.range.dateto)
+            tickets.append(events)
+            if numevents == 0:
+                numevents = len(events)
+            elif numevents != len(events):
+                self.messages.append("The tickets in this set have a different number of events associated with them.  This will adversely affect results below.") 
+        for index in range(numevents):
+            opponent = tickets[0][index]["summary"][:3]
+            start = tickets[0][index]["start"].strftime("%a, %b %-d, %Y %-I %p")
+            stat = nhlstats.filter(name=opponent).values().get()
+            row = {
+                "start": start,
+                "opponent": opponent,
+                "team": self.teamlookup[opponent],
+                "stat": stat,
+                "available": 0,
+                "interest": 0,
+                "pending": 0,
+                "unknown": 0,
+                "reserved": 0
+            }
+            for tix in range(self.numtix):
+                status = tickets[tix][index]["status"]
+                if  status == "available":
+                    row["available"] += 1
+                elif status == "interest":
+                    row["interest"] += 1
+                elif status == "pending":
+                    row["pending"] += 1
+                elif status == "unknown":
+                    row["unknown"] += 1
+                else:
+                    row["reserved"] += 1
+            if row["reserved"] != self.numtix:
+                self.rows.append(row)
+
+class ReportByAttendee(ListBase):
+    set = None
+    attendees = {}
+    range = None
+
+    def __init__(self, navset, navlink, setname, datefrom, dateto):
+        self.set = [set for set in navset if set["name"] == setname][0]
+        super().__init__(navset, navlink, self.set)
+        self.range = DateRange(datefrom, "list")
+        self.range.dateto = dateto
+
+    def RunReport(self):
+        super().FillEventData(self.range.datefrom, self.range.dateto)
+        self.attendees = dict()
+        for i in range(len(self.set["tickets"])):
+            for j in range(len(self.eventdata[i])):
+                event = self.eventdata[i][j]
+                if event["attendee"] is not None and event["attendee"] != "":
+                    data = {
+                            "sort": event["start"].strftime("%Y%m%d"),
+                            "start": event["start"].strftime("%a, %b %-d, %Y %-I %p"),
+                            "summary": event["summary"],
+                            "paid": event["paid"],
+                            "transferred": event["transferred"]
+                        }
+                    if event["attendee"] in self.attendees:
+                        self.attendees[event["attendee"]].append(data)
+                    else:
+                        self.attendees[event["attendee"]] = [ data ]
+        for attendee in self.attendees:
+            self.attendees[attendee].sort(key= lambda e : e["sort"], reverse=False)

@@ -5,5 +5,65 @@
 {% block nav %}
 {% endblock %}
 {% block content %}
-{% load socialaccount %}
+{% load static %}
+<form method="POST">
+    {% csrf_token %}
+<div class="edittable">
+    <div class="editrow">
+        <div class="editprompt">Calendar</div><div class="editvalue">{{event.calendarid}}</div>
+    </div>
+    <div class="editrow">
+        <div class="editprompt">ID</div><div class="editvalue">{{event.id}}</div>
+    </div>
+    <div class="editrow">
+        <div class="editprompt">Name</div><div class="editvalue">{{event.summary}}</div>
+    </div>
+    <div class="editrow">
+        <div class="editprompt">Start</div><div class="editvalue">{{event.date}}</div>
+        <input type="hidden" id="startts" name="startts" value="{{event.startts}}"/>
+        <input type="hidden" id="endts" name="endts" value="{{event.endts}}"/>
+    </div>
+    <div class="editrow">
+        <div class="editprompt">Location</div><div class="editvalue">{{event.location}}</div>
+    </div>
+    <div class="editrow">
+        <div class="editprompt">Status</div>
+        <div class="editvalue">
+            <select id="status" name="status">
+                <option value="available" {% if event.status == 'available' %} selected="selected" {% endif %}>available</option>
+                <option value="interest" {% if event.status == 'interest' %} selected="selected" {% endif %}>interest</option>
+                <option value="pending" {% if event.status == 'pending' %} selected="selected" {% endif %}>pending</option>
+                <option value="reserved" {% if event.status == 'reserved' %} selected="selected" {% endif %}>reserved</option>
+            </select>
+        </div>
+    </div>
+    <div class="editrow">
+        <div class="editprompt">Going</div>
+        <div class="editvalue"><input type="text" size="40" id="attendee" name="attendee" value="{{event.attendee}}" />
+            <input type="button" onClick="javascript:document.getElementById('attendee').value = 'Todd';" value="Todd" />
+            <input type="button" onClick="javascript:document.getElementById('attendee').value = 'Brian';" value="Brian" />
+        </div>
+    </div>
+    <div class="editrow">
+        <div class="editprompt">Paid</div>
+        <div class="editvalue"><input type="checkbox" name="paid" id="paid" {% if event.paid == "true" %} checked="checked" {% endif%} /></div>
+    </div>
+    <div class="editrow">
+        <div class="editprompt">Transferred</div>
+        <div class="editvalue"><input type="checkbox" name="transferred" id="transferred" {% if event.transferred == "true" %} checked="checked" {% endif%} /></div>
+    </div>
+    <div class="editrow">
+        <div class="editprompt">Interested</div>
+        <div class="editvalue">
+            {% for person in event.interest %}
+            <input type="text" size="30" name="interestedname" id="interestedname" value="{{person.name}}" />
+            ({{person.date}})<input type="hidden" name="interesteddate" id="interesteddate" value="{{person.date}}"/><br/>
+            {% endfor %}
+            <input type="text" size="30" name="newinterestedname" id="newinterestedname" /> 
+            <input type="text" size="10" name="newinteresteddate" id="newinteresteddate" value="{{event.today}}" />
+        </div>
+    </div>
+</div>
+<input type="submit" value="Save" />
+</form>
 {% endblock %}

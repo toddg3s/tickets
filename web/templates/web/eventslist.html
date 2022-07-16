@@ -5,10 +5,21 @@
 {% block nav %}
 {% endblock %}
 {% block content %}
-<div>
-    <img src="{% static 'web/listx.jpg' %}"/>
-    <a href="{% url 'eventsmonth' %}"><img src="{% static 'web/month.jpg' %}" /></a>
-    <a href="{% url 'eventsweek' %}"><img src="{% static 'web/week.jpg' %}" /></a>
+<div class="listtable">
+{% for row in rows%}
+    <div class="listrow">
+        <div class="listheader">
+            <div class="secheader">{{row.start}}</div>
+            <div class="secsubheader">{{row.summary}}</div>
+        </div>
+        <div class="listdetail">
+        {% for event in row.events %}    
+            <div class="event {{event.status}}">
+                <a href="{% url 'eventedit' event.calendarid event.id %}">{{event.name}}</a> {{event.attendee}}
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+{% endfor %}
 </div>
-<hr />
 {% endblock %}

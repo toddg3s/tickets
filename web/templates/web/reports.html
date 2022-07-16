@@ -1,0 +1,11 @@
+"{% extends "web/layout.html" %}
+{% block title %}
+    Reports Selector
+{% endblock %}
+{% block nav %}
+{% endblock %}
+{% block content %}
+<h2>Available Tickets</h2>
+<form action="{% url 'reportsavailable' %}" method="POST">
+</form>
+{% endblock %}

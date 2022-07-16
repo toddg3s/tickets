@@ -66,7 +66,13 @@ class Event:
             "location": calevent["location"],
             "start": parser.parse(calevent["start"]["dateTime"]),
             "end": parser.parse(calevent["end"]["dateTime"]),
+            "startts": calevent["start"]["dateTime"],
+            "endts": calevent["end"]["dateTime"],
             "status": "unknown",
+            "attendee": "",
+            "interest": [],
+            "paid": False,
+            "transferred": False,
         }
         if 'colorId' in calevent:
             if calevent['colorId'] == '2': # green
@@ -79,9 +85,16 @@ class Event:
                 event["status"] = 'reserved'
 
         if 'extendedProperties' in calevent and 'private' in calevent['extendedProperties']:
-            event["interest"] = calevent['extendedProperties']['private']['interest']
-            event["paid"] = calevent['extendedProperties']['private']['paid']
-            event["transferred"] = calevent['extendedProperties']['private']['transferred']
+            if "attendee" in calevent["extendedProperties"]["private"]:
+                event["attendee"] = calevent["extendedProperties"]["private"]["attendee"]
+            if "interest" in calevent["extendedProperties"]["private"]:
+                event["interest"] = calevent['extendedProperties']['private']['interest']
+            event["paid"] = False
+            if "paid" in calevent["extendedProperties"]["private"]:     
+                event["paid"] = calevent['extendedProperties']['private']['paid']
+            event["transferred"] = False
+            if "transferred" in calevent["extendedProperties"]["private"]:
+                event["transferred"] = calevent['extendedProperties']['private']['transferred']
 
         return event
 
@@ -97,8 +110,35 @@ class Calendar:
         events.sort(key=lambda e: e["start"], reverse=False)
         return events
     
-    def GetEvent(eventid: str) -> 'Event':
-        return None
+    def GetEvent(calendarid: str, eventid: str):
+        calevent = service.events().get(calendarId=calendarid, eventId=eventid).execute()
+        return Event.fromCalEvent(calevent, calendarid, "")
 
-    def UpdateEvent(event: 'Event'):
-        pass
+    def UpdateEvent(event):
+        calevent = service.events().get(calendarId=event["calendarid"], eventId=event["id"]).execute()
+        if event["status"] == "available":
+            calevent["colorId"] = "2"
+        elif event["status"] == "interest":
+            calevent["colorId"] = "5"
+        elif event["status"] == "pending":
+            calevent["colorId"] = "7"
+        else:
+            calevent["colorId"] = "11"
+        props = {
+            "attendee": "",
+            "interest": [],
+            "paid": False,
+            "transferred": False
+        }
+        if "attendee" in event and event["attendee"] != "":
+            props["attendee"] = event["attendee"]
+        if "paid" in event:
+            props["paid"] = event["paid"]
+        if "transferred" in event:
+            props["transferred"] = event["transferred"]
+        if "interest" in event:
+            props["interest"] = event["interest"]
+        calevent["extendedProperties"] = {
+            "private": props
+        }
+        service.events().update(calendarId = event["calendarid"], eventId=event["id"], body=calevent).execute()

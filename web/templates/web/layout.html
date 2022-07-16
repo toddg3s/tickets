@@ -18,18 +18,15 @@
 </div>
 
 <div class="body-content">
-    <span class="navblock">
+    <div class="navblock">
         {% for s in navset %}
-        <a href="{% url navlink s.name %}">{{s.name}}</a><br/>
-        {% for t in s.tickets %}
-        &nbsp;-&nbsp;{{t.name}}<br/>
-        {% endfor %}
+        <a href="{% url navlink s.name %}">{{s.name}}</a>&nbsp;&nbsp;&nbsp;
         {% endfor %}
         {% block nav %}
         {% endblock %}
-        <br/><a href="#" onClick="javascript:name = prompt('Name for new set:'); window.location.replace('/set/'+name+'/edit');">Add Ticket Set</a>
-    </span>
-    <span class="contentblock">
+        <a href="#" onClick="javascript:name = prompt('Name for new set:'); window.location.replace('/set/'+name+'/edit');">Add Ticket Set</a>
+    </div>
+    <div class="contentblock">
         <div class="navbuttons">
             <a href="{% url 'eventslist' setname %}"><img src="{% static 'web/list.jpg' %}" /></a>
             <a href="{% url 'eventsmonth' setname %}"><img src="{% static 'web/month.jpg' %}" /></a>

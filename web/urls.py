@@ -11,6 +11,9 @@ urlpatterns = [
     path("set/<str:setname>/month/<str:datefrom>", views.eventsmonth, name="eventsmonthvalue"),
     path("set/<str:setname>/week", views.eventsweek, name="eventsweek"),
     path("set/<str:setname>/week/<str:datefrom>", views.eventsweek, name="ventsweekvalue"),
-    path("event", views.eventdisplay, name="eventdisplay"),
-    path("event/edit", views.eventedit, name="eventedit"),
+    path("event/<str:calendarid>/<str:eventid>", views.EditEvent.as_view(), name="eventedit"),
+    path('reports', views.reportselect, name="reportselect"),
+    path('reports/<str:setname>/reset', views.reportsreset, name="reportsreset"),
+    path('reports/<str:setname>/available', views.reportsavailable, name="reportsavailable"),
+    path('reports/<str:setname>/byattendee', views.reportsbyattendee, name="reportsbyattendee")
 ]

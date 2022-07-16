@@ -35,3 +35,10 @@ class TicketSet(models.Model):
             "name": self.name,
             "tickets": tix
         }
+
+class NHLStats(models.Model):
+    name = models.CharField(max_length=3, primary_key=True)
+    rank = models.CharField(max_length=2)
+    record = models.CharField(max_length=10)
+    vssea = models.CharField(max_length=10)
+    playoffs = models.CharField(max_length=30)

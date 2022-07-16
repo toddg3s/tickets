@@ -1,0 +1,37 @@
+{% extends "web/layout.html" %}
+{% block title %}
+    Tickets By Attendee for {{setname}}
+{% endblock %}
+{% block nav %}
+{% endblock %}
+{% block content %}
+{% load static %}
+<h2>Tickets by Attendee for {{setname}}</h2>
+{% for name, events in attendees.items %}
+<div class="secheader">{{name}}</div>
+<div class="listtable">
+{% for event in events %}
+  <div class="listrow">
+      <div class="listcolumn">&nbsp;</div>
+      <div class="listcolumn">
+          {% if event.paid == "true" %}
+            <img src="{% static 'web/paid.jpg' %}"/>
+          {% else %}
+            <img src="{% static 'web/empty.jpg' %}" />
+          {% endif %}
+      </div>
+      <div class="listcolumn">
+        {% if event.transferred == "true" %}
+          <img src="{% static 'web/transfer.jpg' %}"/>
+        {% else %}
+          <img src="{% static 'web/empty.jpg' %}" />
+        {% endif %}
+      </div>
+      <div class="listdetail">
+          {{event.summary}} &nbsp; {{event.start}}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endfor %}
+{% endblock %}
