@@ -55,12 +55,7 @@
     <div class="editrow">
         <div class="editprompt">Interested</div>
         <div class="editvalue">
-            {% for person in event.interest %}
-            <input type="text" size="30" name="interestedname" id="interestedname" value="{{person.name}}" />
-            ({{person.date}})<input type="hidden" name="interesteddate" id="interesteddate" value="{{person.date}}"/><br/>
-            {% endfor %}
-            <input type="text" size="30" name="newinterestedname" id="newinterestedname" /> 
-            <input type="text" size="10" name="newinteresteddate" id="newinteresteddate" value="{{event.today}}" />
+            <input type="text" size="50" name="interest" id="interest" value="{{event.interest}}" />
         </div>
     </div>
 </div>

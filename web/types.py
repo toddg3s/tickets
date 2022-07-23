@@ -122,6 +122,13 @@ class Page:
         self.navlink = navlink
         self.setname = setname
 
+class Home(Page):
+
+    def __init__(self, navset, navlink, setname):
+        super().__init__(navset, navlink, setname)
+        self.defaultmonth = "10-2022"
+        self.defaultweek = "10-15-2022"
+
 class ListBase(Page):
     set = None
     eventdata = []
@@ -247,33 +254,47 @@ class Month(ListBase):
 
 class Week(ListBase):
     range = DateRange(date.today(), "week")
+    rangestr = ""
+    prevweek = ""
+    nextweek = ""
     days = None
 
-    def __init__(self, set: TicketSet, datefrom: date):
-        super().__init__(set)
+    def __init__(self, navset, navlink, set: TicketSet, datefrom: date):
+        super().__init__(navset, navlink, set)
         self.range = DateRange(datefrom, "week")
-        self.days = [Day(), Day(), Day(), Day(), Day(), Day(), Day()]
+        self.prevweek = self.range.previous()
+        self.nextweek = self.range.next()
+        self.rangestr = str(self.range)
+        self.days = []
 
 
     def FillDays(self):
         super().FillEventData(self.range.datefrom, self.range.dateto)
-        numtix = len(self.set.tickets)
+        numtix = len(self.set["tickets"])
+        self.days = []
         for weekday in range(7):
             currdate = self.range.datefrom + relativedelta(days = weekday)
-            day = Day()
-            day.number = str(currdate.day)
-            day.summary = ""
-            day.events = [numtix]
+            day = {
+                "number": str(currdate.day),
+                "summary": "",
+                "events": []
+            }
             for i in range(numtix):
                 if self.eventindex[i] > len(self.eventdata[i]) - 1:
-                    day.events[i] = Event()
+                    day["events"].append({})
                 else:
                     event = self.eventdata[i][self.eventindex[i]]
-                    if event.start.date() == currdate:
-                        day.summary = event.summary
-                        day.events[i] = event
+                    if event["start"].date() == currdate:
+                        day["summary"] = event["summary"]
+                        day["events"].append({
+                            "calendarid": event["calendarid"],
+                            "id": event["id"],
+                            "name": event["name"],
+                            "attendee": event["attendee"],
+                            "status": event["status"]
+                        })
                         self.eventindex[i] = self.eventindex[i] + 1
-            self.days[weekday] = day
+            self.days.append(day)
 
 
 class SetEdit(Page):

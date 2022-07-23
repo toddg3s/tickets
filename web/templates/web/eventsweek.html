@@ -5,5 +5,30 @@
 {% block nav %}
 {% endblock %}
 {% block content %}
-{% load socialaccount %}
+{% load static %}
+<h1><a href="{% url "eventsweekvalue" setname prevweek %}"><img src="{% static 'web/left.jpg' %}"/></a>&nbsp;{{rangestr}}&nbsp;<a href="{% url "eventsweekvalue" setname nextweek %}"><img src="{% static 'web/right.jpg' %}"/></a></h1>
+<div class="monthtable">
+    <div class="weekrow">
+        <div class="dayhead">Monday</div>
+        <div class="dayhead">Tuesday</div>
+        <div class="dayhead">Wednesday</div>
+        <div class="dayhead">Thursday</div>
+        <div class="dayhead">Friday</div>
+        <div class="dayhead">Saturday</div>
+        <div class="dayhead">Sunday</div>
+    </div>
+    <div class="weekrow">
+    {% for day in days %}
+        <div class="daycell">
+            <div class="daynum">{{day.number}}</div>
+        {% if day.summary != ""%}
+            <div class="daysum">{{day.summary}}</div>
+        {% for event in day.events %}
+            <div class="event {{event.status}}"><a href="{% url 'eventedit' event.calendarid event.id %}">{{event.name}}</a> {{event.attendee}}</div>
+        {% endfor %}
+        {% endif %}
+        </div>
+    {% endfor %}
+    </div>
+</div>
 {% endblock %}

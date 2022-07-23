@@ -70,7 +70,7 @@ class Event:
             "endts": calevent["end"]["dateTime"],
             "status": "unknown",
             "attendee": "",
-            "interest": [],
+            "interest": "",
             "paid": False,
             "transferred": False,
         }
@@ -141,4 +141,6 @@ class Calendar:
         calevent["extendedProperties"] = {
             "private": props
         }
+        print("to google")
+        print(json.dumps(calevent, indent=4))
         service.events().update(calendarId = event["calendarid"], eventId=event["id"], body=calevent).execute()

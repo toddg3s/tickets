@@ -22,7 +22,7 @@ def index(request):
     #         stats.vssea = parts[3]
     #         stats.playoffs = parts[4]
     #         stats.save()
-    page = Page(navsets, getNavLink(request), navsets[0]["name"] if len(navsets) > 0 else "none")
+    page = Home(navsets, getNavLink(request), navsets[0]["name"] if len(navsets) > 0 else "none")
     return render(request, "web/index.html", page.__dict__)
 
 def eventslist(request, setname = "", datefrom = "", dateto = ""): # Display events for ticket(s) in list form
@@ -31,7 +31,6 @@ def eventslist(request, setname = "", datefrom = "", dateto = ""): # Display eve
     set = [set for set in navsets if set['name'] == setname][0]
     page = List(navsets, navlink, set, datefrom, dateto)
     page.FillRows()
-    print(page.rows)
     return render(request, "web/eventslist.html", page.__dict__)
 
 def eventsmonth(request, setname = "", datefrom=""): # Display events for ticket(s) in month form
@@ -49,7 +48,14 @@ def eventsmonth(request, setname = "", datefrom=""): # Display events for ticket
     return render(request, "web/eventsmonth.html", page.__dict__)
 
 def eventsweek(request, setname = "", datefrom = ""): # Display events for ticket(s) in week form
-    return HttpResponse("This is the week page")
+    navsets = getNavSets(request)
+    dfrom = date.today()
+    if datefrom != "":
+        dfrom = parser.parse(datefrom).date()
+    set = [set for set in navsets if set['name'] == setname][0]
+    page = Week(navsets, "eventsweek", set, dfrom)
+    page.FillDays()
+    return render(request, "web/eventsweek.html", page.__dict__)    
 
 def reportselect(request):
     return HttpResponse("reports selector")
@@ -80,14 +86,15 @@ class EditEvent(FormView):
         event = Calendar.GetEvent(kwargs["calendarid"], kwargs["eventid"])
         page = EventEdit(getNavSets(request), getNavLink(request), event)
         page.event["today"] = date.today().strftime("%Y-%m-%d")
-        print("Before update:")
         page.event["start"] = ""
         page.event["end"] = ""
+        print("before")
         print(json.dumps(page.event, indent=4))
-        #print(page.__dict__)
         return render(request, "web/eventedit.html", page.__dict__)
 
     def post(self, request, *args, **kwargs):
+        for key in request.POST:
+            print(f"{key} = {request.POST[key]}")
         event = {
             "calendarid": kwargs["calendarid"],
             "id": kwargs["eventid"],
@@ -97,22 +104,12 @@ class EditEvent(FormView):
             "attendee": request.POST["attendee"],
             "paid": ("paid" in request.POST and request.POST["paid"] == "on"),
             "transferred": ("transferred" in request.POST and request.POST["transferred"] == "on"),
-            "interest": []
+            "interest": ""
         }
-        print("Updated: ")
+        if "interest" in request.POST:
+            event["interest"] = request.POST["interest"]
+        print("after")
         print(json.dumps(event, indent=4))
-        if "interestedname" in request.POST:
-            for i in range(request.POST["interestedname"]):
-                if request.POST["interestedname"] != "":
-                    event["interest"].append({
-                        "name": request.POST["interestedname"][i],
-                        "date": request.POST["interesteddate"][i]
-                    })
-        if "newinterestedname" in request.POST and request.POST["newinterestedname"] != "":
-            event["interest"].append({
-                "name": request.POST["newinterestedname"],
-                "date": request.POST["newinteresteddate"] if request.POST["newinteresteddate"] != "" else date.today().strftime("%Y-%m-%d")
-            })
         Calendar.UpdateEvent(event)
         return HttpResponse("OK")
 

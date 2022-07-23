@@ -5,9 +5,19 @@
 {% block nav %}
 {% endblock %}
 {% block content %}
-{% load socialaccount %}
-<a href="{% provider_login_url 'google' %}?next=/">Login with Google</a><br/>
-{% for o in output %}
-{{ o }}<br/>
+{% for set in navset %}
+<div class="secheader">{{set.name}}</div>
+<div class="secsubheader">Tickets</div>
+<div><a href="{% url 'eventslist' set.name %}">As a list</a></div>
+<div><a href="{% url 'eventsmonth' set.name %}">By month</a></div>
+<div><a href="{% url 'eventsweek' set.name %}">By week</a></div>
+<br/>
+<div><a href="{% url 'eventsmonthvalue' set.name defaultmonth %}">Default month</a></div>
+<div><a href="{% url 'eventsweekvalue' set.name defaultweek %}">Default week</a></div>
+<br/>
+<div class="secsubheader">Reports</div>
+<div><a href="{% url 'reportsavailable' set.name %}">Available tickets</a></div>
+<div><a href="{% url 'reportsbyattendee' set.name %}">By Attendee</a></div>
+<hr />
 {% endfor %}
 {% endblock %}
