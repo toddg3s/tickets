@@ -1,27 +1,28 @@
 from datetime import date
 from django.shortcuts import render
 from django.forms.models import model_to_dict
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import FormView
 from web.models import *
 from web.types import *
-from web.utils import getNavSets, getNavLink
+from web.utils import getNavSets, getNavLink, dtformat
 from web.cal import Calendar
 import json
 
 def index(request):
     navsets = getNavSets(request)
-    # with open('web/nhlstats.csv') as f:
-    #     lines = f.readlines()
-    #     for line in lines:
-    #         parts = line.split(",")
-    #         stats = NHLStats()
-    #         stats.name = parts[0]
-    #         stats.rank = parts[1]
-    #         stats.record = parts[2]
-    #         stats.vssea = parts[3]
-    #         stats.playoffs = parts[4]
-    #         stats.save()
+    if "init" in request.GET:
+        with open('web/nhlstats.csv') as f:
+            lines = f.readlines()
+            for line in lines:
+                parts = line.split(",")
+                stats = NHLStats()
+                stats.name = parts[0]
+                stats.rank = parts[1]
+                stats.record = parts[2]
+                stats.vssea = parts[3]
+                stats.playoffs = parts[4]
+                stats.save()
     page = Home(navsets, getNavLink(request), navsets[0]["name"] if len(navsets) > 0 else "none")
     return render(request, "web/index.html", page.__dict__)
 
@@ -76,6 +77,11 @@ def reportsavailable(request, setname = ""):
     page.RunReport()
     return render(request, "web/reportavailable.html", page.__dict__)
 
+def reportsshort(request, setname = ""):
+    page = ReportAvailable(getNavSets(request), getNavLink(request), setname, date.today(), date(2050,12,31))
+    page.RunReport()
+    return render(request, "web/reportshort.html", page.__dict__)
+
 def reportsbyattendee(request, setname = ""):
     page = ReportByAttendee(getNavSets(request), getNavLink(request), setname, date(2000,1,1), date(2050,1,1))
     page.RunReport()
@@ -84,17 +90,13 @@ def reportsbyattendee(request, setname = ""):
 class EditEvent(FormView):
     def get(self, request, *args, **kwargs):
         event = Calendar.GetEvent(kwargs["calendarid"], kwargs["eventid"])
-        page = EventEdit(getNavSets(request), getNavLink(request), event)
-        page.event["today"] = date.today().strftime("%Y-%m-%d")
+        page = EventEdit(getNavSets(request), getNavLink(request), event, request.headers['referer'])
+        page.event["today"] = dtformat(date.today(),"%Y-%m-%d")
         page.event["start"] = ""
         page.event["end"] = ""
-        print("before")
-        print(json.dumps(page.event, indent=4))
         return render(request, "web/eventedit.html", page.__dict__)
 
     def post(self, request, *args, **kwargs):
-        for key in request.POST:
-            print(f"{key} = {request.POST[key]}")
         event = {
             "calendarid": kwargs["calendarid"],
             "id": kwargs["eventid"],
@@ -108,10 +110,11 @@ class EditEvent(FormView):
         }
         if "interest" in request.POST:
             event["interest"] = request.POST["interest"]
-        print("after")
-        print(json.dumps(event, indent=4))
         Calendar.UpdateEvent(event)
-        return HttpResponse("OK")
+        if "ref" in request.POST and request.POST["ref"] != "":
+            return HttpResponseRedirect(request.POST["ref"])
+        else:
+            return HttpResponse("OK")
 
 
 class EditSet(FormView):

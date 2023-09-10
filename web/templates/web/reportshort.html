@@ -31,25 +31,24 @@
 {% else %}
 <div>
 {% endif %}
-<div class="secheader">{{row.start}}</div>
-<div class="secsubheader">{{row.team}}</div>
-&nbsp;&nbsp;&nbsp;{{row.opponent}} 2021-2022 stats: League rank: <strong>{{row.stat.rank}}</strong>,&nbsp; Record: <strong>{{row.stat.record}}</strong>,&nbsp; SEA vs. {{row.opponent}}: <strong>{{row.stat.vssea}}</strong>,&nbsp; Playoffs: <strong>{{row.stat.playoffs}}</strong><br/>
+{{row.startshort}} vs. {{row.opponent}}
+{% if row.available < 2 %}
 {% if row.available > 0 %}
-{{row.available}} tickets available<br/>
+{{row.available}} tickets available, 
 {% endif %}
 {% if row.interest > 0 %}
-{{row.interest}} tickets have some interest expressed (not paid, just interested)<br/>
+{{row.interest}} tickets have some interest expressed (not paid, just interested), 
 {% endif %}
 {% if row.pending > 0 %}
-{{row.pending}} tickets have sales pending<br/>
+{{row.pending}} tickets have sales pending, 
 {% endif %}
 {% if row.reserved > 0 %}
-{{row.reserved}} tickets reserved<br/>
+{{row.reserved}} tickets reserved, 
 {% endif %}
 {% if row.unknown > 0 %}
-{{row.unknown}} tickets are in the twilight zone<br/>
+{{row.unknown}} tickets are in the twilight zone
 {% endif %}
-<hr/>
+{% endif %}
 <br/>
 </div>
 {% endfor %}

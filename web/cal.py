@@ -141,6 +141,4 @@ class Calendar:
         calevent["extendedProperties"] = {
             "private": props
         }
-        print("to google")
-        print(json.dumps(calevent, indent=4))
         service.events().update(calendarId = event["calendarid"], eventId=event["id"], body=calevent).execute()

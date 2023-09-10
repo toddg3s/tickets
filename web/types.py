@@ -7,6 +7,7 @@ from django.db import models
 from web.models import NHLStats, Ticket, TicketSet
 from web.cal import Event, Calendar
 import json
+from web.utils import dtformat
 class DateRange:
     datefrom = date.min
     dateto = date.max
@@ -35,10 +36,10 @@ class DateRange:
             return str(self.datefrom.year - 1)
         elif self.type == "month":
             prev = self.datefrom - relativedelta(months = 1)
-            return prev.strftime("%m-%Y")
+            return dtformat(prev,("%m-%Y"))
         elif self.type == "week":
             prev = self.datefrom - relativedelta(days = 7)
-            return prev.strftime("%Y-%m-%d")
+            return dtformat(prev,"%Y-%m-%d")
         else:
             return ""
 
@@ -47,10 +48,10 @@ class DateRange:
             return str(self.datefrom.year + 1)
         elif self.type == "month":
             next = self.datefrom + relativedelta(months = 1)
-            return next.strftime("%m-%Y")
+            return dtformat(next,"%m-%Y")
         elif self.type == "week":
             next = self.datefrom + relativedelta(days = 7)
-            return next.strftime("%Y-%m-%d")
+            return dtformat(next,"%Y-%m-%d")
         else:
             return ""
 
@@ -60,14 +61,14 @@ class DateRange:
             if self.datefrom == self.dateto:
                 return self.datefrom("%B %d, %Y")
             else:
-                return self.datefrom.strftime("%B %d, %Y") + " - " + self.dateto.strftime("%B %d %Y")
+                return dtformat(self.datefrom,"%B %d, %Y") + " - " + dtformat(self.dateto,"%B %d %Y")
         elif self.type == "week":
-            return f"Week of {self.datefrom.strftime('%B %d, %Y')}"
+            return f"Week of {dtformat(self.datefrom,'%B %d, %Y')}"
         elif self.type == "month":
             if self.datefrom.month == self.dateto.month:
-                return self.datefrom.strftime("%B %Y")
+                return dtformat(self.datefrom,"%B %Y")
             else:
-                return self.datefrom.strftime("%B %Y") + " - " + self.dateto.strftime("%B %Y")
+                return dtformat(self.datefrom,"%B %Y") + " - " + dtformat(self.dateto,"%B %Y")
         elif self.type == "year":
             if self.datefrom.year == self.dateto.year:
                 return str(self.datefrom.year)
@@ -176,7 +177,7 @@ class List(ListBase):
         self.rows = []
         for index in range(len(self.eventdata[0])):
             row = {
-                "start": self.eventdata[0][index]["start"].strftime("%a, %b %-d, %Y %-I %p"),
+                "start": dtformat(self.eventdata[0][index]["start"], "long"),
                 "summary": self.eventdata[0][index]["summary"],
                 "events": []
             }
@@ -306,8 +307,9 @@ class SetEdit(Page):
 
 class EventEdit(Page):
     event = None
+    ref = None
 
-    def __init__(self, navset, navlink, event):
+    def __init__(self, navset, navlink, event, ref = None):
         setname = ""
         for set in navset:
             for ticket in set["tickets"]:
@@ -315,8 +317,9 @@ class EventEdit(Page):
                     setname = set["name"]
                     break
         super().__init__(navset, navlink, setname)
-        event["date"] = event["start"].strftime("%A %B %-d, %Y %-I:%M %p")
+        event["date"] = dtformat(event["start"],"long")
         self.event = event
+        self.ref = ref
 
 class ReportAvailable(Page):
     teamlookup = {
@@ -381,10 +384,12 @@ class ReportAvailable(Page):
                 self.messages.append("The tickets in this set have a different number of events associated with them.  This will adversely affect results below.") 
         for index in range(numevents):
             opponent = tickets[0][index]["summary"][:3]
-            start = tickets[0][index]["start"].strftime("%a, %b %-d, %Y %-I %p")
+            start = dtformat(tickets[0][index]["start"],"long")
+            startshort = dtformat(tickets[0][index]["start"], "short")
             stat = nhlstats.filter(name=opponent).values().get()
             row = {
                 "start": start,
+                "startshort": startshort,
                 "opponent": opponent,
                 "team": self.teamlookup[opponent],
                 "stat": stat,
@@ -428,8 +433,10 @@ class ReportByAttendee(ListBase):
                 event = self.eventdata[i][j]
                 if event["attendee"] is not None and event["attendee"] != "":
                     data = {
-                            "sort": event["start"].strftime("%Y%m%d"),
-                            "start": event["start"].strftime("%a, %b %-d, %Y %-I %p"),
+                            "calendarid": event["calendarid"],
+                            "id": event["id"],
+                            "sort": dtformat(event["start"],"%Y%m%d"),
+                            "start": dtformat(event["start"],"long"),
                             "summary": event["summary"],
                             "paid": event["paid"],
                             "transferred": event["transferred"]

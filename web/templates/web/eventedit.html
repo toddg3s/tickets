@@ -8,6 +8,7 @@
 {% load static %}
 <form method="POST">
     {% csrf_token %}
+    <input type="hidden" id="ref" name="ref" value="{{ref}}" />
 <div class="edittable">
     <div class="editrow">
         <div class="editprompt">Calendar</div><div class="editvalue">{{event.calendarid}}</div>

@@ -17,6 +17,7 @@
 <br/>
 <div class="secsubheader">Reports</div>
 <div><a href="{% url 'reportsavailable' set.name %}">Available tickets</a></div>
+<div><a href="{% url 'reportsshort' set.name %}">Available tickets (short format)</a></div>
 <div><a href="{% url 'reportsbyattendee' set.name %}">By Attendee</a></div>
 <hr />
 {% endfor %}

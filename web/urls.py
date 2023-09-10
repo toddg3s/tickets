@@ -15,5 +15,6 @@ urlpatterns = [
     path('reports', views.reportselect, name="reportselect"),
     path('reports/<str:setname>/reset', views.reportsreset, name="reportsreset"),
     path('reports/<str:setname>/available', views.reportsavailable, name="reportsavailable"),
+    path('reports/<str:setname>/short', views.reportsshort, name="reportsshort"),
     path('reports/<str:setname>/byattendee', views.reportsbyattendee, name="reportsbyattendee")
 ]

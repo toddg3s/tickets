@@ -28,7 +28,7 @@
         {% endif %}
       </div>
       <div class="listdetail">
-          {{event.summary}} &nbsp; {{event.start}}
+        <a href="{% url 'eventedit' event.calendarid event.id %}">{{event.summary}}</a> &nbsp; {{event.start}}
       </div>
     </div>
   {% endfor %}
