@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>{% block title %}{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'web/site.css' %}"/>
+</head>
+
+<body>
+<div class="titlebar">
+    <span class="logoblock">
+        <a href="{% url 'home' %}"><img src="{% static 'web/logo.png' %}" width="50" height="50"/></a>
+    </span>
+    <span class="titleblock">
+        go2.hockey tickets
+    </span>
+</div>
+
+<div class="body-content">
+    <div class="navblock">
+        {% for s in navset %}
+        <a href="{% url navlink s.name %}">{{s.name}}</a>&nbsp;&nbsp;&nbsp;
+        {% endfor %}
+        {% block nav %}
+        {% endblock %}
+        <a href="#" onClick="javascript:name = prompt('Name for new set:'); window.location.replace('/set/'+name+'/edit');">Add Ticket Set</a>
+    </div>
+    <div class="contentblock">
+        <div class="navbuttons">
+            <a href="{% url 'eventslist' setname %}"><img src="{% static 'web/list.jpg' %}" /></a>
+            <a href="{% url 'eventsmonth' setname %}"><img src="{% static 'web/month.jpg' %}" /></a>
+            <a href="{% url 'eventsweek' setname %}"><img src="{% static 'web/week.jpg' %}" /></a>
+            <a href="{% url 'editset' setname %}"><img src="{% static 'web/edit.jpg' %}" /></a>
+        </div>
+        <hr />
+        {% block content %}
+        {% endblock %}
+    </span>
+</div>
+<div class="body-content">
+    <hr/>
+    <footer>
+        <p>&copy; 2022</p>
+    </footer>
+</div>
+</body>
+</html>

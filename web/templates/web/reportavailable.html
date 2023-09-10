@@ -1,0 +1,56 @@
+{% extends "web/layout.html" %}
+{% block title %}
+    Available Tickets for {{setname}}
+{% endblock %}
+{% block nav %}
+{% endblock %}
+{% block content %}
+<input type="checkbox" id="nopartial" onclick="togglepartial();">
+   <label>Hide partial sets</label>
+</input>
+<script language="JavaScript">
+    function togglepartial() {
+        var chk = document.getElementById("nopartial")
+        var list = document.getElementsByName("partial")
+        for(var i = 0; i < list.length; i++) {
+            if (chk.checked) {
+                list[i].style.display = "none"
+            } else {
+                list[i].style.display = "block"
+            }
+        }
+    }
+    </script>
+<h2>Available Tickets for {{setname}}</h2>
+{% for msg in messages %}
+{{msg}}
+{% endfor %}
+{% for row in rows %}
+{% if row.available < 2 %}
+<div name="partial">
+{% else %}
+<div>
+{% endif %}
+<div class="secheader">{{row.start}}</div>
+<div class="secsubheader">{{row.team}}</div>
+&nbsp;&nbsp;&nbsp;{{row.opponent}} 2021-2022 stats: League rank: <strong>{{row.stat.rank}}</strong>,&nbsp; Record: <strong>{{row.stat.record}}</strong>,&nbsp; SEA vs. {{row.opponent}}: <strong>{{row.stat.vssea}}</strong>,&nbsp; Playoffs: <strong>{{row.stat.playoffs}}</strong><br/>
+{% if row.available > 0 %}
+{{row.available}} tickets available<br/>
+{% endif %}
+{% if row.interest > 0 %}
+{{row.interest}} tickets have some interest expressed (not paid, just interested)<br/>
+{% endif %}
+{% if row.pending > 0 %}
+{{row.pending}} tickets have sales pending<br/>
+{% endif %}
+{% if row.reserved > 0 %}
+{{row.reserved}} tickets reserved<br/>
+{% endif %}
+{% if row.unknown > 0 %}
+{{row.unknown}} tickets are in the twilight zone<br/>
+{% endif %}
+<hr/>
+<br/>
+</div>
+{% endfor %}
+{% endblock %}

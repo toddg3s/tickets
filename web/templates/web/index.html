@@ -1,0 +1,24 @@
+{% extends "web/layout.html" %}
+{% block title %}
+    Home
+{% endblock %}
+{% block nav %}
+{% endblock %}
+{% block content %}
+{% for set in navset %}
+<div class="secheader">{{set.name}}</div>
+<div class="secsubheader">Tickets</div>
+<div><a href="{% url 'eventslist' set.name %}">As a list</a></div>
+<div><a href="{% url 'eventsmonth' set.name %}">By month</a></div>
+<div><a href="{% url 'eventsweek' set.name %}">By week</a></div>
+<br/>
+<div><a href="{% url 'eventsmonthvalue' set.name defaultmonth %}">Default month</a></div>
+<div><a href="{% url 'eventsweekvalue' set.name defaultweek %}">Default week</a></div>
+<br/>
+<div class="secsubheader">Reports</div>
+<div><a href="{% url 'reportsavailable' set.name %}">Available tickets</a></div>
+<div><a href="{% url 'reportsshort' set.name %}">Available tickets (short format)</a></div>
+<div><a href="{% url 'reportsbyattendee' set.name %}">By Attendee</a></div>
+<hr />
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "web/layout.html" %}
+{% block title %}
+    Modify Ticket Set
+{% endblock %}
+{% block nav %}
+{% endblock %}
+{% block content %}
+{% load socialaccount %}
+<h1>{{set.name}}</h1><br/><br/>
+{% for t in set.tickets %}
+<form method="POST">
+    {% csrf_token %}
+    id: {{t.id}}<input type="hidden" value="{{t.id}}" name="id" id="id" /><br/>
+    name: <input type="text" value="{{t.name}}" name="name" id="name" /><br/>
+    <input type="submit" value="Update" id="submit" name="submit"/><br/>
+</form>
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" value="{{t.id}}" name="id" id="id" />
+    <input type="submit" value="Delete" id="submit" name="submit"/>
+</form>
+<br/>
+<br/>
+{% endfor %}
+Add Ticket:<br />
+<form method="POST">
+    {% csrf_token %}
+    id: <input type="text" value="" name="id" id="id" /><br/>
+    name: <input type="text" value="" name="name" id="name"/><br/>
+    <input type="submit" value="Add" id="submit" name="submit" />
+</form>
+{% endblock %}
